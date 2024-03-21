@@ -1,0 +1,393 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// phpcs:disable Generic.Files.LineLength
+// phpcs:disable Magento2.Templates.ThisInTemplate.FoundHelper
+?>
+<?php
+/**
+ * Ship to multiple address template
+ *
+ * @var $block \Magento\Multishipping\Block\Checkout\Addresses
+ */
+
+?>
+<form id="checkout_multishipping_form"
+      data-mage-init='{
+          "multiShipping": {"itemsQty": <?= /* @noEscape */ (int)$block->getCheckout()->getQuote()->getItemsSummaryQty() ?>},
+          "cartUpdate": {
+               "validationURL": "<?= $block->escapeUrl($block->getUrl('multishipping/checkout/checkItems')) ?>",
+               "eventName": "updateMulticartItemQty"
+          }}'
+      action="<?= $block->escapeUrl($block->getPostActionUrl()) ?>"
+      method="post"
+      class="multicheckout address form">
+    <div class="title">
+        <strong><?= $block->escapeHtml(__('Please select a shipping address for applicable items.')) ?></strong>
+    </div>
+    <input type="hidden" name="continue" value="0" id="can_continue_flag"/>
+    <input type="hidden" name="new_address" value="0" id="add_new_address_flag"/>
+    <div class="table-wrapper">
+        <table class="items data table" id="multiship-addresses-table">
+            <caption class="table-caption">
+                <?= $block->escapeHtml(__('Please select a shipping address for applicable items.')) ?>
+            </caption>
+            <thead>
+            <tr>
+                <th class="col product" scope="col"><?= $block->escapeHtml(__('Product')) ?></th>
+                <th class="col qty" scope="col"><?= $block->escapeHtml(__('Qty')) ?></th>
+                <th class="col address" scope="col"><?= $block->escapeHtml(__('Send To')) ?></th>
+                <th class="col actions" scope="col">&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($block->getItems() as $_index => $_item):
+            ?>
+                <?php if ($_item->getQuoteItem()):
+                ?>
+                    <tr>
+                        <td class="col product" data-th="<?= $block->escapeHtml(__('Product')) ?>">
+                            <?= $block->getItemHtml($_item->getQuoteItem()) ?>
+                        </td>
+                        <td class="col qty" data-th="<?= $block->escapeHtml(__('Qty')) ?>">
+                            <div class="field qty">
+                                <label for="ship-<?= $block->escapeHtml($_index) ?>-<?= $block->escapeHtml($_item->getQuoteItemId()) ?>-qty"
+                                       class="label">
+                                    <span><?= $block->escapeHtml(__('Qty')) ?></span>
+                                </label>
+                                <div class="control">
+                                    
+                                    <input type="hidden" id="quote_item_send" data-multiship-item-quote-id="<?= $block->escapeHtml($_item->getSku()) ?>">
+
+                                    <input type="number"
+                                           data-multiship-item-id="<?= $block->escapeHtml($_item->getSku()) ?>"
+                                           id="ship-<?= $block->escapeHtml($_index) ?>-<?= $block->escapeHtml($_item->getQuoteItemId()) ?>-qty"
+                                           name="ship[<?= $block->escapeHtml($_index) ?>][<?= $block->escapeHtml($_item->getQuoteItemId()) ?>][qty]"
+                                           value="<?= $block->escapeHtml($_item->getQty()) ?>"
+                                           size="2"
+                                           min="0"
+                                           class="input-text qty"
+                                           data-validate="{number: true, required:true, 'validate-greater-than-zero':true}"
+                                           autocomplete="off"
+                                    />
+                                </div>
+                            </div>
+                        </td>
+                        <td class="col address" data-th="<?= $block->escapeHtml(__('Send To')) ?>">
+                            <?php if ($_item->getProduct()->getIsVirtual()): ?>
+                                <div class="applicable">
+                                    <?= $block->escapeHtml(__('A shipping selection is not applicable.')) ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="field address">
+                                    <label for="ship_<?= $block->escapeHtml($_index) ?>_<?= $block->escapeHtml($_item->getQuoteItemId()) ?>_address"
+                                           class="label">
+                                        <span><?= $block->escapeHtml(__('Send To')) ?></span>
+                                    </label>
+                                    <div class="control">
+                                        <?= $block->getAddressesHtmlSelect($_item, $_index) ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                          <td class="col add" style="padding:0px" data-th="<?= $block->escapeHtml(__('Add')) ?>">
+                            <a href="#"
+                               title="<?= $block->escapeHtml(__('Add Item')) ?>"
+                               data-post=''
+                               class="action add"
+                               data-multiship-item-add="">
+                                <span class="save"><?= $block->escapeHtml(__('Add item')) ?></span>
+                            </a>
+                        </td>
+                     <td class="col actions" data-th="<?= $block->escapeHtml(__('Actions')) ?>">
+                        <a href="#" 
+                           title="<?= $block->escapeHtml(__('Remove Item')) ?>" 
+                           class="action delete" 
+                           data-multiship-item-remove=""
+                           data-quote-item-id-remove="<?= $_item->getQuoteItemId() ?>">
+                            <span><?= $block->escapeHtml(__('Remove item')) ?></span>
+                        </a>
+                    </td>
+
+
+                    </tr>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="actions-toolbar">
+        <div class="primary">
+            <button type="submit"
+                    title="<?= $block->escapeHtml(__('Go to Shipping Information')) ?>"
+                    class="action primary continue<?= $block->isContinueDisabled() ? ' disabled' : '' ?>"
+                    data-role="can-continue"
+                    data-flag="1"
+                <?php if ($block->isContinueDisabled()): ?>
+                    disabled="disabled"
+                <?php endif; ?>>
+                <span><?= $block->escapeHtml(__('Go to Shipping Information')) ?></span>
+            </button>
+        </div>
+        <div class="secondary">
+            <button type="submit"
+                    data-multiship-item-update=""
+                    class="action update"
+                    data-role="can-continue"
+                    data-flag="0">
+                <span><?= $block->escapeHtml(__('Update Qty &amp; Addresses')) ?></span>
+            </button>
+            <button type="button"
+                    title="<?= $block->escapeHtml(__('Enter a New Address')) ?>"
+                    class="action add"
+                    data-role="add-new-address">
+                <span><?= $block->escapeHtml(__('Enter a New Address')) ?></span>
+            </button>
+            <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>"
+               class="action back">
+                <span><?= $block->escapeHtml(__('Back to Shopping Cart')) ?></span>
+            </a>
+        </div>
+    </div>
+</form>
+<style>
+    a.action.save_quote_item {
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    margin: 0;
+    outline: none;
+    padding: 5px 15px;
+    min-width: 120px;
+    background-color: #dd2400;
+    border: 1px solid #dd2400;
+    color: #fff;
+    font-weight: 500;
+    border-radius: 3px;
+    display: inline-block;
+    vertical-align: top;
+    line-height: 26px;
+    text-align: center;
+    transition: color 500ms ease, background-color 500ms ease, border-color 500ms ease;
+    -moz-backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+   a.action.save_quote_item:hover {
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    margin: 0;
+    outline: none;
+    padding: 5px 15px;
+    min-width: 120px;
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #dd2400;
+    font-weight: 500;
+    border-radius: 3px;
+    display: inline-block;
+    vertical-align: top;
+    line-height: 26px;
+    text-align: center;
+    transition: color 500ms ease, background-color 500ms ease, border-color 500ms ease;
+    -moz-backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+a.action.add span {
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    margin: 0;
+    outline: none;
+    padding: 5px 15px;
+    min-width: 120px;
+    border: 1px solid #dd2400;
+    font-weight: 500;
+    border-radius: 3px;
+    display: inline-block;
+    vertical-align: top;
+    line-height: 26px;
+    text-align: center;
+    transition: color 500ms ease, background-color 500ms ease, border-color 500ms ease;
+    -moz-backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+</style>
+<script>
+require(['jquery'], function($) {
+    
+    function addSameProductViaAjax(quoteItemId, qty) {
+        // AJAX request
+        $.ajax({
+            url: '/custom_multishipping/index/index',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                quote_item_id: quoteItemId,
+                qty: qty
+                // Add any additional data needed for your AJAX request
+            },
+        success: function(response) {
+    if (response.success) {
+        console.log(response.quote_item_id);
+        
+        var quote_item_id = response.quote_item_id;
+        // Extract product data from the response
+        var product = response.product.data;
+
+        // Construct HTML for the new table row
+        var newRow = '<tr>';
+        newRow += '<td class="col product" data-th="Product">';
+        newRow += '<strong class="product name product-item-name"><a href="' + product.url_key + '">' + product.name + '</a></strong>';
+        newRow += '</td>';
+        newRow += '<td class="col qty" data-th="Qty">';
+        newRow += '<div class="field qty">';
+        newRow += '<label for="ship-0-' + quote_item_id + '-qty" class="label">';
+        newRow += '<span>Qty</span>';
+        newRow += '</label>';
+        newRow += '<div class="control">';
+        newRow += '<input type="hidden" id="quote_item_send" data-multiship-item-quote-id="' + product.sku + '">';
+        newRow += '<input type="number" data-multiship-item-id="' + product.sku + '" id="ship-0-' + quote_item_id + '-qty" name="ship[0][' + quote_item_id + '][qty]" value="1" size="2" min="0" class="input-text qty" data-validate="{number: true, required:true, \'validate-greater-than-zero\':true}" autocomplete="off">';
+        newRow += '</div>';
+        newRow += '</div>';
+        newRow += '</td>';
+        newRow += '<td class="col address" data-th="Send To">';
+        newRow += '<div class="field address">';
+        newRow += '<label for="ship_0_' + quote_item_id + '_address" class="label">';
+        newRow += '<span>Send To</span>';
+        newRow += '</label>';
+        newRow += '<div class="control">';
+        newRow += '<select name="ship[0][' + quote_item_id + '][address]" id="ship_0_' + quote_item_id + '_address" class="multiship-address-select" title="Select Address">';
+        newRow += '</select>'; // Add options for shipping addresses here if needed
+        newRow += '</div>';
+        newRow += '</div>';
+        newRow += '</td>';
+        newRow += '<td class="col add" style="padding:0px" data-th="Add">';
+        newRow += '<a href="#" title="Add Item" data-post="" class="action save_quote_item" data-multiship-item-add="">';
+        newRow += '<span class="save">Save item</span>';
+        newRow += '</a>';
+        newRow += '</td>';
+        newRow += '<td class="col actions" data-th="Actions">';
+        newRow += '<a href="#" title="Remove Item" data-quote-item-id-remove="' + response.quote_item_id + '" class="action delete" data-multiship-item-remove="">';
+        newRow += '<span class="remove_ajax_quote_item">Remove</span>';
+        newRow += '</a>';
+        newRow += '</td>';
+        newRow += '</tr>';
+
+        // Append the new row before the end of the table body
+        $('#multiship-addresses-table tbody').append(newRow);
+
+        // Fetch addresses via AJAX and populate the dropdown
+       $.ajax({
+        url: '/custom_multishipping/Address/getAddress',
+        type: 'GET',
+        dataType: 'json',
+        success: function(addressResponse) {
+            if (addressResponse.success) {
+                var addressOptions = '';
+                $.each(addressResponse.addresses, function(index, address) {
+                    addressOptions += '<option value="' + address.value + '">' + address.label + '</option>';
+                });
+                $('#ship_0_' + quote_item_id + '_address').html(addressOptions);
+            } else {
+                console.error('Failed to fetch multishipping addresses.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error(error);
+        }
+    });
+
+        // Trigger processStop event
+        jQuery("body").trigger("processStop");
+    } else {
+        alert('Failed to add product via AJAX!');
+    }
+},
+
+
+            error: function(xhr, status, error) {
+                // Handle errors
+                console.error(error);
+            }
+        });
+    }
+    
+        function removeProductViaAjax(quoteItemId) {
+        $.ajax({
+                url: '/custom_multishipping/checkout/removeitem',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    quote_item_id: quoteItemId
+                },
+            success: function(response) {
+            if (response.success) {
+                jQuery("body").trigger("processStop");
+            } else {
+                //alert('Failed to add product via AJAX!');
+            }
+        },
+        error: function(xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+    
+       
+        jQuery(document).on('click', '.action.save_quote_item', function(event) {
+            jQuery("body").trigger("processStart");
+            jQuery('.action.update').trigger('click');
+            jQuery("body").trigger("processStop");
+        });
+
+
+    // Attach event listener to the "Add" button
+    $(document).on('click', '.action.add', function(event) {
+         jQuery("body").trigger("processStart");
+        event.preventDefault();
+        var quoteItemId = $(this).closest('tr').find('#quote_item_send').data('multiship-item-quote-id');
+        var qty = $(this).closest('tr').find('.input-text.qty').val();
+        
+        // Trigger AJAX request to add the same product with the same quantity
+        addSameProductViaAjax(quoteItemId, qty);
+
+          // Clone the clicked row
+        
+        //var clonedRow = $(this).closest('tr').clone();
+        
+        //clonedRow.find('.action').removeClass('add').addClass('save').find('span.save').text('Save');
+
+
+        // Append the cloned row after the original row
+       //$('tbody').append(clonedRow);
+    });
+    
+   $(document).on('click', '.action.delete', function(event) {
+    console.log("Delete button clicked");
+    jQuery("body").trigger("processStart");
+    event.preventDefault();
+    var quoteItemId = $(this).data('quote-item-id-remove');
+    //alert(quoteItemId);
+    console.log("quoteItemId:", quoteItemId);
+    removeProductViaAjax(quoteItemId);  
+});
+
+
+    
+    
+    $(document).on('click', '.action.delete', function(event) {
+    event.preventDefault();
+    
+    // Remove the corresponding cloned row
+    $(this).closest('tr').remove();
+});
+});
+</script>

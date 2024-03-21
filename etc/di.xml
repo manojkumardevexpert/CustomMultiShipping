@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Multishipping\Block\Checkout\Addresses">
+        <plugin name="custom_multishipping_checkout_addresses_plugin" type="Custom\MultiShipping\Plugin\CheckoutAddressesPlugin" sortOrder="10"/>
+    </type>
+    <preference for="Magento\Multishipping\Controller\Checkout\AddressesPost" type="Custom\MultiShipping\Controller\Checkout\AddressesPost" />
+</config>

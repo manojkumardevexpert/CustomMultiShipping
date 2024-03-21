@@ -1,0 +1,22 @@
+{
+    "name": "custom/module-multishipping",
+    "description": "MultiShipping",
+    "type": "magento2-module",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "module-multishipping",
+            "email": "info@multishipping.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Custom\\MultiShipping\\": ""
+        }
+    }
+}
